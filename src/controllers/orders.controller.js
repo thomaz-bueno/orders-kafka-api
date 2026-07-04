@@ -12,10 +12,3 @@ const createOrder = (req, res) => {
 module.exports = {
     createOrder
 };
-
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/thomaz-bueno/orders-kafka-api.git
-git push -u origin main
