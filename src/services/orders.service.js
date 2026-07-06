@@ -1,87 +1,83 @@
 const createOrder = (body) => {
-  const validObject = validateOrder(body);
-  const { total } = validObject;
+  const validationResult = validateOrder(body);
 
-  if (total > 0) {
-    const response = createResponse(validObject);
-
-    return response;
-  }
+  return createResponse(validationResult);
 };
 
-const validateOrder = (body) => {
+const validateOrder = (body = {}) => {
   const { customerId, items } = body;
 
   if (!customerId) {
     return {
-      status: "failed",
+      valid: false,
       message: "CustomerId inexistente.",
-      total: null,
     };
   }
 
   if (!Array.isArray(items)) {
     return {
-      status: "failed",
+      valid: false,
       message: "A variável 'items' tem que ser um array.",
-      total: null,
     };
   }
 
   if (items.length === 0) {
     return {
-      status: "failed",
+      valid: false,
       message: "A variável 'items' está vazia",
-      total: null,
     };
   }
 
   let total = 0;
   for (const item of items) {
-    if (!item.productId) {
+    if (!item?.productId) {
       return {
-        status: "failed",
+        valid: false,
         message: "ProductId inválido.",
-        total: null,
       };
     }
 
-    if (item.quantity <= 0) {
+    if (!isPositiveNumber(item.quantity)) {
       return {
-        status: "failed",
+        valid: false,
         message: "Quantidade inválida",
-        total: null,
       };
     }
 
-    if (item.price <= 0) {
+    if (!isPositiveNumber(item.price)) {
       return {
-        status: "failed",
+        valid: false,
         message: "Preço inválido",
-        total: null,
       };
     }
 
     total += item.quantity * item.price;
   }
 
-  return { valid: true, total };
-};
-
-const createResponse = (object) => {
-  const { valid, total } = object;  
-
-  const status = valid ? "created" : "failed";
-  const message = valid
-    ? "Pedido criado com sucesso!"
-    : "Falha na criação do pedido.";
-  const response = {
-    status,
-    message,
+  return {
+    valid: true,
     total,
   };
-  return response;
 };
+
+const createResponse = ({ valid, message, total = null }) => {
+  if (!valid) {
+    return {
+      status: "failed",
+      message,
+      total,
+    };
+  }
+
+  return {
+    status: "created",
+    message: "Pedido criado com sucesso!",
+    total,
+  };
+};
+
+const isPositiveNumber = (value) =>
+  typeof value === "number" && Number.isFinite(value) && value > 0;
 
 module.exports = {
   createOrder,
