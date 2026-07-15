@@ -1,8 +1,8 @@
 const ordersService = require('../services/orders.service')
 
-const createOrder = (req, res) => {
+const createOrder = async (req, res) => {
     try {
-        const result = ordersService.createOrder(req.body);
+        const result = await ordersService.createOrder(req.body);
         const statusCode = result.status === 'failed' ? 400 : 201;
 
         return res.status(statusCode).json(result);
