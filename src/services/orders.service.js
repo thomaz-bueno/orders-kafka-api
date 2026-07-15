@@ -1,8 +1,18 @@
-const createOrder = (body) => {
+const ordersRepository = require('../repositories/orders.repository');
+
+const createOrder = async (body) => {
   const validationResult = validateOrder(body);
+
+  if(validationResult.status === 'created') {
+    await ordersRepository.saveOrder(body, validationResult, createUUID());
+  }
 
   return createResponse(validationResult);
 };
+
+const createUUID = () => {
+  return crypto.randomUUID();
+}
 
 const validateOrder = (body = {}) => {
   const { customerId, items } = body;
