@@ -3,8 +3,12 @@ const ordersRepository = require('../repositories/orders.repository');
 const createOrder = async (body) => {
   const validationResult = validateOrder(body);
 
-  if(validationResult.status === 'created') {
-    await ordersRepository.saveOrder(body, validationResult, createUUID());
+  if (validationResult.valid) {
+    await ordersRepository.saveOrder({
+      uuid: createUUID(),
+      items: body.items,
+      total: validationResult.total,
+    });
   }
 
   return createResponse(validationResult);
@@ -15,14 +19,7 @@ const createUUID = () => {
 }
 
 const validateOrder = (body = {}) => {
-  const { customerId, items } = body;
-
-  if (!customerId) {
-    return {
-      valid: false,
-      message: "CustomerId inexistente.",
-    };
-  }
+  const { items } = body;
 
   if (!Array.isArray(items)) {
     return {
