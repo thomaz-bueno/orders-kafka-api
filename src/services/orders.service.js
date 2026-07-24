@@ -1,14 +1,18 @@
 const ordersRepository = require('../repositories/orders.repository');
+const { produceOrderCreated } = require('../kafka/producer')
+const crypto = require('crypto');
 
 const createOrder = async (body) => {
   const validationResult = validateOrder(body);
 
   if (validationResult.valid) {
-    await ordersRepository.saveOrder({
+    const savedOrder = await ordersRepository.saveOrder({
       uuid: createUUID(),
       items: body.items,
       total: validationResult.total,
     });
+
+    await produceOrderCreated(savedOrder);
   }
 
   return createResponse(validationResult);
